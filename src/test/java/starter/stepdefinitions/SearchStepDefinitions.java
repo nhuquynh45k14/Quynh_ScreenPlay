@@ -1,36 +1,65 @@
 package starter.stepdefinitions;
 
-import io.cucumber.java.Before;
-import io.cucumber.java.ParameterType;
+
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.screenplay.Actor;
-import net.serenitybdd.screenplay.actors.OnStage;
-import net.serenitybdd.screenplay.actors.OnlineCast;
 import net.serenitybdd.screenplay.ensure.Ensure;
+import starter.Data.Product;
+import starter.Data.ShippingAddress;
+import starter.Page.CartPage;
+import starter.Page.CheckOutShippingAddressPage;
+import starter.Page.Perform;
 import starter.navigation.NavigateTo;
-import starter.search.LookForInformation;
-import starter.search.WikipediaArticle;
+
+import static starter.Data.Product.product;
 
 public class SearchStepDefinitions {
 
-    @Given("{actor} is researching things on the internet")
-    public void researchingThings(Actor actor) {
-        actor.wasAbleTo(NavigateTo.theWikipediaHomePage());
+    @Given("{actor} open HomePage")
+    public void openHomePage(Actor actor) {
+        actor.wasAbleTo(NavigateTo.thePerromartHomePage());
+        actor.wasAbleTo(Perform.closePopup());
     }
 
-    @When("{actor} looks up {string}")
-    public void searchesFor(Actor actor, String term) {
+    @When("{actor} looks up")
+    public void searchesFor(Actor actor) {
         actor.attemptsTo(
-                LookForInformation.about(term)
+                Perform.searchProduct(Product.searchTerm)
         );
     }
 
-    @Then("{actor} should see information about {string}")
-    public void should_see_information_about(Actor actor, String term) {
+    @When("{actor} click chosen product")
+    public void clickChosenProduct(Actor actor) {
         actor.attemptsTo(
-                Ensure.that(WikipediaArticle.HEADING).hasText(term)
+                Perform.clickProduct(product)
         );
+    }
+
+    @When("{actor} add to Cart")
+    public void addToCart(Actor actor) {
+        actor.attemptsTo(Perform.addToCart());
+    }
+
+    @When("{actor} verify product {string}")
+    public void iVerifyProduct(Actor actor, String productName) {
+        actor.attemptsTo(Ensure.that(CartPage.nameProduct(productName)).hasText(productName));
+    }
+
+    @When("{actor} click check out")
+    public void clickCheckOut(Actor actor) {
+        actor.attemptsTo(Perform.clickCheckout());
+    }
+
+    @When("{actor} add shipping address")
+    public void addShippingAddress(Actor actor) {
+        actor.attemptsTo(Perform.addShippingAddress(ShippingAddress.email, ShippingAddress.firstName, ShippingAddress.lastName,
+                ShippingAddress.address, ShippingAddress.apartment, ShippingAddress.postalCode, ShippingAddress.phone));
+    }
+
+    @When("{actor} verify Shipping Address")
+    public void iVerifyShippingAddress(Actor actor) {
+        actor.has(Ensure.that(CheckOutShippingAddressPage.CONTACT).hasText(ShippingAddress.email));
+        actor.has(Ensure.that(CheckOutShippingAddressPage.SHIP_TO).hasText(ShippingAddress.address + ", " + ShippingAddress.apartment + ", Singapore " + ShippingAddress.postalCode));
     }
 }
